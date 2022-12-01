@@ -1,14 +1,10 @@
-import socket
-import sys
 import argparse
-import json
-import logging
 import select
-import time
-import logs.config_server_log
-from errors import IncorrectDataRecivedError
-from common.variables import *
+import socket
+
 from common.utils import *
+from common.metaclasses import *
+from common.descriptors import *
 from decos import log
 
 logger = logging.getLogger('server_dist')
@@ -25,7 +21,9 @@ def arg_parser():
     return listen_address, listen_port
 
 
-class Server:
+class Server(metaclass=ServerVerifier):
+    port = PortCheck()
+
     def __init__(self, listen_address, listen_port):
         # Параметры подключения
         self.addr = listen_address

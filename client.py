@@ -1,21 +1,17 @@
-import sys
-import json
-import socket
-import time
-import dis
 import argparse
-import logging
+import socket
 import threading
-import logs.config_client_log
-from common.variables import *
+import time
+
 from common.utils import *
-from errors import IncorrectDataRecivedError, ReqFieldMissingError, ServerError
+from common.metaclasses import *
 from decos import log
+from errors import IncorrectDataRecivedError, ReqFieldMissingError, ServerError
 
 logger = logging.getLogger('client_dist')
 
 
-class ClientSender(threading.Thread):
+class ClientSender(threading.Thread, metaclass=ClientVerify):
     def __init__(self, account_name, sock):
         self.account_name = account_name
         self.sock = sock
@@ -133,7 +129,8 @@ def arg_parser():
 
     if not 1023 < server_port < 65536:
         logger.critical(
-            f'Попытка запуска клиента с неподходящим номером порта: {server_port}. Допустимы адреса с 1024 до 65535. Клиент завершается.')
+            f'Попытка запуска клиента с неподходящим номером порта: {server_port}. Допустимы адреса с 1024 до 65535. '
+            f'Клиент завершается.')
         exit(1)
 
     return server_address, server_port, client_name
