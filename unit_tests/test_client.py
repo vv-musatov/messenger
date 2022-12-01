@@ -6,7 +6,6 @@ import unittest
 from errors import ReqFieldMissingError, ServerError
 
 
-# Класс с тестами
 class TestClass(unittest.TestCase):
     # тест коректного запроса
     def test_def_presense(self):

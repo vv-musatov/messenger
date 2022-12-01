@@ -12,18 +12,15 @@ from common.utils import *
 from errors import IncorrectDataRecivedError, ReqFieldMissingError, ServerError
 from decos import log
 
-# Инициализация клиентского логера
 logger = logging.getLogger('client_dist')
 
 
-# Класс формировки и отправки сообщений на сервер и взаимодействия с пользователем.
 class ClientSender(threading.Thread):
     def __init__(self, account_name, sock):
         self.account_name = account_name
         self.sock = sock
         super().__init__()
 
-    # Функция создаёт словарь с сообщением о выходе.
     def create_exit_message(self):
         return {
             ACTION: EXIT,
@@ -31,7 +28,6 @@ class ClientSender(threading.Thread):
             ACCOUNT_NAME: self.account_name
         }
 
-    # Функция запрашивает кому отправить сообщение и само сообщение, и отправляет полученные данные на сервер.
     def create_message(self):
         to = input('Введите получателя сообщения: ')
         message = input('Введите сообщение для отправки: ')
@@ -50,7 +46,6 @@ class ClientSender(threading.Thread):
             logger.critical('Потеряно соединение с сервером.')
             exit(1)
 
-    # Функция взаимодействия с пользователем, запрашивает команды, отправляет сообщения
     def run(self):
         self.print_help()
         while True:
@@ -66,13 +61,11 @@ class ClientSender(threading.Thread):
                     pass
                 print('Завершение соединения.')
                 logger.info('Завершение работы по команде пользователя.')
-                # Задержка неоходима, чтобы успело уйти сообщение о выходе
                 time.sleep(0.5)
                 break
             else:
                 print('Команда не распознана, попробойте снова. help - вывести поддерживаемые команды.')
 
-    # Функция выводящяя справку по использованию.
     def print_help(self):
         print('Поддерживаемые команды:')
         print('message - отправить сообщение. Кому и текст будет запрошены отдельно.')
@@ -80,14 +73,12 @@ class ClientSender(threading.Thread):
         print('exit - выход из программы')
 
 
-# Класс-приёмник сообщений с сервера. Принимает сообщения, выводит в консоль.
 class ClientReader(threading.Thread):
     def __init__(self, account_name, sock):
         self.account_name = account_name
         self.sock = sock
         super().__init__()
 
-    # Основной цикл приёмника сообщений, принимает сообщения, выводит в консоль. Завершается при потере соединения.
     def run(self):
         while True:
             try:
@@ -105,7 +96,6 @@ class ClientReader(threading.Thread):
                 break
 
 
-# Функция генерирует запрос о присутствии клиента
 @log
 def create_presence(account_name):
     out = {
@@ -119,8 +109,6 @@ def create_presence(account_name):
     return out
 
 
-# Функция разбирает ответ сервера на сообщение о присутствии, возращает 200 если все ОК или генерирует исключение при\
-# ошибке.
 @log
 def process_response_ans(message):
     logger.debug(f'Разбор приветственного сообщения от сервера: {message}')
@@ -132,7 +120,6 @@ def process_response_ans(message):
     raise ReqFieldMissingError(RESPONSE)
 
 
-# Парсер аргументов коммандной строки
 @log
 def arg_parser():
     parser = argparse.ArgumentParser()
@@ -144,7 +131,6 @@ def arg_parser():
     server_port = namespace.port
     client_name = namespace.name
 
-    # проверим подходящий номер порта
     if not 1023 < server_port < 65536:
         logger.critical(
             f'Попытка запуска клиента с неподходящим номером порта: {server_port}. Допустимы адреса с 1024 до 65535. Клиент завершается.')
@@ -154,13 +140,10 @@ def arg_parser():
 
 
 def main():
-    # Сообщаем о запуске
     print('Консольный месседжер. Клиентский модуль.')
 
-    # Загружаем параметы коммандной строки
     server_address, server_port, client_name = arg_parser()
 
-    # Если имя пользователя не было задано, необходимо запросить пользователя.
     if not client_name:
         client_name = input('Введите имя пользователя: ')
     else:
@@ -170,7 +153,6 @@ def main():
         f'Запущен клиент с парамертами: адрес сервера: {server_address} , '
         f'порт: {server_port}, имя пользователя: {client_name}')
 
-    # Инициализация сокета и сообщение серверу о нашем появлении
     try:
         transport = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         transport.connect((server_address, server_port))
@@ -193,19 +175,15 @@ def main():
             f'конечный компьютер отверг запрос на подключение.')
         exit(1)
     else:
-        # Если соединение с сервером установлено корректно, запускаем клиентский процесс приёма сообщений
         module_reciver = ClientReader(client_name, transport)
         module_reciver.daemon = True
         module_reciver.start()
 
-        # затем запускаем отправку сообщений и взаимодействие с пользователем.
         module_sender = ClientSender(client_name, transport)
         module_sender.daemon = True
         module_sender.start()
         logger.debug('Запущены процессы')
 
-        # Watchdog основной цикл, если один из потоков завершён, то значит или потеряно соединение, или пользователь
-        # ввёл exit. Поскольку все события обработываются в потоках, достаточно просто завершить цикл.
         while True:
             time.sleep(1)
             if module_reciver.is_alive() and module_sender.is_alive():
