@@ -69,7 +69,7 @@ class ClientSender(threading.Thread, metaclass=ClientVerify):
         print('exit - выход из программы')
 
 
-class ClientReader(threading.Thread):
+class ClientReader(threading.Thread, metaclass=ClientVerify):
     def __init__(self, account_name, sock):
         self.account_name = account_name
         self.sock = sock
