@@ -3,10 +3,10 @@ import logs.config_server_log
 import logs.config_client_log
 import logging
 
-if sys.argv[0].find('client_dist') == -1:
-    logger = logging.getLogger('server_dist')
+if sys.argv[0].find('client') == -1:
+    logger = logging.getLogger('server')
 else:
-    logger = logging.getLogger('client_dist')
+    logger = logging.getLogger('client')
 
 
 def log(func_to_log):
