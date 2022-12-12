@@ -41,7 +41,6 @@ class ServerStorage:
             self.accepted = 0
 
     def __init__(self, path):
-        print(path)
         self.database_engine = create_engine(f'sqlite:///{path}', echo=False, pool_recycle=7200,
                                              connect_args={'check_same_thread': False})
 
@@ -149,10 +148,10 @@ class ServerStorage:
         if not contact:
             return
 
-        print(self.session.query(self.UsersContacts).filter(
+        self.session.query(self.UsersContacts).filter(
             self.UsersContacts.user == user.id,
             self.UsersContacts.contact == contact.id
-        ).delete())
+        ).delete()
         self.session.commit()
 
     def users_list(self):
