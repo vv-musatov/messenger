@@ -1,15 +1,8 @@
-"""
-It is a launcher for starting subprocesses for server_dist and clients of two types: senders and listeners.
-for more information:
-https://stackoverflow.com/questions/67348716/kill-process-do-not-kill-the-subprocess-and-do-not-close-a-terminal-window
-"""
-
 import os
 import signal
 import subprocess
 import sys
 from time import sleep
-
 
 PYTHON_PATH = sys.executable
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -24,17 +17,18 @@ def get_subprocess(file_with_args):
 
 process = []
 while True:
-    TEXT_FOR_INPUT = "Выберите действие: q - выход, s - запустить сервер и клиенты, x - закрыть все окна: "
+    TEXT_FOR_INPUT = "Выберите действие: q - выход, s - запустить сервер, k - запустить клиенты, x - закрыть все окна: "
     action = input(TEXT_FOR_INPUT)
 
     if action == "q":
         break
     elif action == "s":
         process.append(get_subprocess("server.py"))
-
-        for i in range(3):
-            process.append(get_subprocess(f"client.py -n test{i+1}"))
-
+    elif action == 'k':
+        print('Убедитесь, что на сервере зарегистрировано необходимое количество клиентов')
+        clients_count = int(input('Введите количество тестовых клиентов для запуска: '))
+        for i in range(clients_count):
+            process.append(get_subprocess(f"client.py -n test{i + 1}"))
     elif action == "x":
         while process:
             victim = process.pop()
