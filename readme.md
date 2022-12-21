@@ -6,6 +6,8 @@
 ## Стек
 
 * `Python` > 3.5
+* `PyQt5`
+* `SQLAlchemy`
 * `PyCharm`
 
 ## Лицензия
